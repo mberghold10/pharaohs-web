@@ -1,0 +1,131 @@
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+/* ── View toggle ── */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--dark-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.toggle-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn--active {
+  background: var(--dark-4);
+  color: var(--accent);
+}
+
+/* ── Player grid ── */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.player-card {
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.player-card:hover {
+  border-color: var(--gold-dark);
+  transform: translateY(-2px);
+}
+
+.player-number {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: rgba(201, 168, 76, 0.3);
+  line-height: 1;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.player-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.player-detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.player-stats {
+  display: flex;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.pstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pstat-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.pstat-key {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Position badges ── */
+.pos-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pos-g  { background: rgba(156, 39, 176, 0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.25); }
+.pos-d  { background: rgba(33, 150, 243, 0.12); color: #90caf9; border: 1px solid rgba(33,150,243,0.2); }
+.pos-f,
+.pos-c,
+.pos-lw,
+.pos-rw { background: rgba(247, 151, 30, 0.12); color: var(--accent); border: 1px solid var(--border); }

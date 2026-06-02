@@ -1,0 +1,213 @@
+{
+  "players": [
+    {
+      "name": "Marc-Aurele, Brandon",
+      "gp": 2,
+      "g": 0,
+      "a": 0,
+      "pts": 0,
+      "pim": 0
+    },
+    {
+      "name": "Oliveri, Payton",
+      "gp": 2,
+      "g": 0,
+      "a": 1,
+      "pts": 1,
+      "pim": 2
+    },
+    {
+      "name": "Wilmer, Jack",
+      "gp": 9,
+      "g": 11,
+      "a": 3,
+      "pts": 14,
+      "pim": 2
+    },
+    {
+      "name": "Maroon, Chris",
+      "gp": 10,
+      "g": 7,
+      "a": 1,
+      "pts": 8,
+      "pim": 2
+    },
+    {
+      "name": "Brownell, Sam",
+      "gp": 8,
+      "g": 2,
+      "a": 1,
+      "pts": 3,
+      "pim": 10
+    },
+    {
+      "name": "Heyn, Trisan",
+      "gp": 10,
+      "g": 2,
+      "a": 2,
+      "pts": 4,
+      "pim": 2
+    },
+    {
+      "name": "Capriglione, Nate",
+      "gp": 6,
+      "g": 8,
+      "a": 0,
+      "pts": 8,
+      "pim": 6
+    },
+    {
+      "name": "Owens, Dan",
+      "gp": 14,
+      "g": 3,
+      "a": 5,
+      "pts": 8,
+      "pim": 18
+    },
+    {
+      "name": "Carroll, Joe",
+      "gp": 3,
+      "g": 1,
+      "a": 0,
+      "pts": 1,
+      "pim": 2
+    },
+    {
+      "name": "Prantner, Andrew",
+      "gp": 6,
+      "g": 1,
+      "a": 1,
+      "pts": 2,
+      "pim": 4
+    },
+    {
+      "name": "Chelf, Kevin",
+      "gp": 15,
+      "g": 0,
+      "a": 3,
+      "pts": 3,
+      "pim": 12
+    },
+    {
+      "name": "Keehner, Zephan",
+      "gp": 6,
+      "g": 3,
+      "a": 3,
+      "pts": 6,
+      "pim": 6
+    },
+    {
+      "name": "Kaczor, Radislaw",
+      "gp": 0,
+      "g": 0,
+      "a": 0,
+      "pts": 0,
+      "pim": 0
+    },
+    {
+      "name": "Summa, Billy",
+      "gp": 12,
+      "g": 7,
+      "a": 1,
+      "pts": 8,
+      "pim": 24
+    },
+    {
+      "name": "Smith, Patrick",
+      "gp": 1,
+      "g": 0,
+      "a": 0,
+      "pts": 0,
+      "pim": 0
+    },
+    {
+      "name": "Valdesuso, Ronan",
+      "gp": 9,
+      "g": 5,
+      "a": 3,
+      "pts": 8,
+      "pim": 4
+    },
+    {
+      "name": "Howard, Chris",
+      "gp": 8,
+      "g": 1,
+      "a": 0,
+      "pts": 1,
+      "pim": 0
+    },
+    {
+      "name": "Bogomolov, Arseny",
+      "gp": 12,
+      "g": 1,
+      "a": 1,
+      "pts": 2,
+      "pim": 2
+    },
+    {
+      "name": "King, Jeremy",
+      "gp": 1,
+      "g": 0,
+      "a": 1,
+      "pts": 1,
+      "pim": 0
+    },
+    {
+      "name": "Berghold, Michael",
+      "gp": 11,
+      "g": 2,
+      "a": 6,
+      "pts": 8,
+      "pim": 0
+    },
+    {
+      "name": "Miranda, Richard",
+      "gp": 15,
+      "g": 4,
+      "a": 3,
+      "pts": 7,
+      "pim": 18
+    },
+    {
+      "name": "Lowen, Luke",
+      "gp": 3,
+      "g": 7,
+      "a": 4,
+      "pts": 11,
+      "pim": 0
+    },
+    {
+      "name": "Holt, John",
+      "gp": 1,
+      "g": 0,
+      "a": 0,
+      "pts": 0,
+      "pim": 2
+    },
+    {
+      "name": "DiCioccio, Noel",
+      "gp": 2,
+      "g": 0,
+      "a": 0,
+      "pts": 0,
+      "pim": 0
+    },
+    {
+      "name": "Thomas, Devon",
+      "gp": 5,
+      "g": 1,
+      "a": 0,
+      "pts": 1,
+      "pim": 6
+    },
+    {
+      "name": "Oman, Chris",
+      "gp": 10,
+      "g": 1,
+      "a": 4,
+      "pts": 5,
+      "pim": 14
+    }
+  ],
+  "_updated": "2026-06-02T11:53:21.772Z"
+}

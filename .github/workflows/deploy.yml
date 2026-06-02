@@ -1,0 +1,65 @@
+name: Scrape & Deploy
+
+on:
+  # Nightly at 6am UTC (2am ET / 11pm PT)
+  schedule:
+    - cron: '0 6 * * *'
+  # Also run on every push to main
+  push:
+    branches: [main]
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only allow one deployment at a time
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Puppeteer system deps
+        run: npx puppeteer browsers install chrome
+
+      - name: Run scraper
+        run: npm run scrape
+        # Don't fail the whole deploy if scraping has issues —
+        # the existing JSON files in the repo serve as fallback
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

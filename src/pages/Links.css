@@ -1,0 +1,70 @@
+.links-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.link-group-title {
+  font-size: 1rem;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.link-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-card {
+  display: block;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.link-card:hover {
+  border-color: var(--gold-dark);
+  transform: translateX(4px);
+}
+
+.link-card-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  gap: 12px;
+}
+
+.link-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 2px;
+  transition: color 0.2s;
+}
+
+.link-card:hover .link-label {
+  color: var(--gold-light);
+}
+
+.link-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.link-arrow {
+  color: var(--gold-dark);
+  font-size: 1.1rem;
+  transition: color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.link-card:hover .link-arrow {
+  color: var(--gold);
+  transform: translateX(3px);
+}

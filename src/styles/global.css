@@ -1,0 +1,224 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Dark mode (default) ── */
+:root,
+[data-theme="dark"] {
+  --orange: #f7971e;
+  --orange-light: #ffb347;
+  --orange-dark: #c97010;
+  --orange-glow: rgba(247, 151, 30, 0.3);
+
+  --black: #0a0a0a;
+  --dark: #111111;
+  --dark-2: #1a1a1a;
+  --dark-3: #242424;
+  --dark-4: #2e2e2e;
+
+  --bg: var(--black);
+  --bg-card: var(--dark-2);
+  --bg-card-header: var(--dark-3);
+  --text: #e8e8e8;
+  --text-muted: #888;
+  --border: rgba(247, 151, 30, 0.2);
+  --radius: 8px;
+
+  --accent: var(--orange);
+  --accent-light: var(--orange-light);
+  --accent-dark: var(--orange-dark);
+  --accent-glow: var(--orange-glow);
+
+  color-scheme: dark;
+}
+
+/* ── Light mode ── */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --orange: #f28f23;
+    --orange-light: #f7971e;
+    --orange-dark: #c97010;
+    --orange-secondary: #ffd9ab;
+    --orange-glow: rgba(242, 143, 35, 0.25);
+
+    --bg: #f5f0eb;
+    --bg-card: #ffffff;
+    --bg-card-header: #fdf6ee;
+    --text: #1a1008;
+    --text-muted: #7a6a55;
+    --border: rgba(242, 143, 35, 0.3);
+
+    --accent: var(--orange);
+    --accent-light: var(--orange-light);
+    --accent-dark: var(--orange-dark);
+    --accent-glow: var(--orange-glow);
+
+    color-scheme: light;
+  }
+}
+
+[data-theme="light"] {
+  --orange: #f28f23;
+  --orange-light: #f7971e;
+  --orange-dark: #c97010;
+  --orange-secondary: #ffd9ab;
+  --orange-glow: rgba(242, 143, 35, 0.25);
+
+  --bg: #f5f0eb;
+  --bg-card: #ffffff;
+  --bg-card-header: #fdf6ee;
+  --text: #1a1008;
+  --text-muted: #7a6a55;
+  --border: rgba(242, 143, 35, 0.3);
+
+  --accent: var(--orange);
+  --accent-light: var(--orange-light);
+  --accent-dark: var(--orange-dark);
+  --accent-glow: var(--orange-glow);
+
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--accent);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent-light);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card-header);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: var(--bg-card-header);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card-header);
+}
+
+.card-header h2 {
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.page-title {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-gold {
+  background: rgba(247, 151, 30, 0.15);
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+.loading {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 20px 0;
+}
+
+.error {
+  color: #e06060;
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  background: rgba(224, 96, 96, 0.08);
+  border: 1px solid rgba(224, 96, 96, 0.2);
+  border-radius: var(--radius);
+}

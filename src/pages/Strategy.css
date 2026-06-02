@@ -1,0 +1,257 @@
+.strategy-page {
+  padding-bottom: 60px;
+}
+
+/* ── Gate screen ── */
+.strategy-gate {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 40px,
+    rgba(247, 151, 30, 0.015) 40px,
+    rgba(247, 151, 30, 0.015) 80px
+  );
+}
+
+.gate-inner {
+  text-align: center;
+  max-width: 540px;
+  padding: 48px 40px;
+  background: var(--bg-card);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 0 60px rgba(247, 151, 30, 0.1);
+}
+
+.gate-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.gate-title {
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.gate-subtitle {
+  font-size: clamp(1rem, 3.5vw, 1.5rem);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  margin-bottom: 24px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+
+.gate-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.gate-btn {
+  display: inline-block;
+  padding: 12px 32px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.gate-btn:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+/* ── Empty state ── */
+.strategy-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.strategy-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Sidebar ── */
+.strategy-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 84px;
+}
+
+.strategy-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.strategy-nav-btn:hover {
+  background: var(--dark-3);
+  color: var(--text);
+}
+
+.strategy-nav-btn--active {
+  background: rgba(247, 151, 30, 0.08);
+  border-color: var(--border);
+  color: var(--accent);
+}
+
+.nav-btn-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+/* ── Content area ── */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.section-icon {
+  font-size: 1.6rem;
+}
+
+.section-heading h2 {
+  font-size: 1.8rem;
+}
+
+.subsection {
+  margin-bottom: 20px;
+}
+
+/* ── Strategy text ── */
+.strategy-text p {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+.strategy-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Subpoints (situation blocks) ── */
+.subpoint {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: var(--dark-3);
+  border: 1px solid var(--border);
+}
+
+.subpoint-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.subpoint-header span {
+  font-size: 1.1rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.subpoint-header h3 {
+  font-size: 1rem;
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Callout boxes ── */
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.callout-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.callout p {
+  color: inherit;
+}
+
+.callout-rule {
+  background: rgba(247, 151, 30, 0.08);
+  border: 1px solid rgba(247, 151, 30, 0.25);
+  color: var(--accent-light);
+}
+
+.callout-tip {
+  background: rgba(33, 150, 243, 0.08);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  color: #90caf9;
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .strategy-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .strategy-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .strategy-nav-btn {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
