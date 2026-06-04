@@ -393,6 +393,7 @@ export default function History() {
                 and love for the game live on with everyone who had the privilege of sharing
                 the ice with him. We play in his memory.
               </p>
+              <p className="memorial-note">Note: Kevin is alive and well. Kevin if you see this please come back.</p>
             </div>
           </div>
         </div>
