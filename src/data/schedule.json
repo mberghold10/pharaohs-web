@@ -1,179 +1,271 @@
 {
   "games": [
     {
-      "date": null,
-      "home": "Away",
-      "away": "Recap",
-      "opponent": "Away vs Recap"
+      "date": "2025-12-01",
+      "time": "7:20 PM",
+      "home": "Outlaws",
+      "away": "Pharaohs",
+      "opponent": "Outlaws",
+      "score": "3-9",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2025-12-08",
+      "time": "7:20 PM",
       "home": "Pharaohs",
-      "away": "L (3 - 9)",
-      "opponent": "L (3 - 9)"
+      "away": "Punishers HC",
+      "opponent": "Punishers HC",
+      "score": "5-1",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Punishers HC",
-      "away": "L (5 - 1)",
-      "opponent": "Punishers HC vs L (5 - 1)"
+      "date": "2025-12-20",
+      "time": "6:50 PM",
+      "home": "British Bulldogs",
+      "away": "Pharaohs",
+      "opponent": "British Bulldogs",
+      "score": "0-6",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2026-01-04",
+      "time": "5:55 PM",
+      "home": "Nortec",
+      "away": "Pharaohs",
+      "opponent": "Nortec",
+      "score": "0-3",
+      "result": "L",
+      "playoffs": false
+    },
+    {
+      "date": "2026-01-10",
+      "time": "11:55 PM",
       "home": "Pharaohs",
-      "away": "L (0 - 6)",
-      "opponent": "L (0 - 6)"
+      "away": "Dragons",
+      "opponent": "Dragons",
+      "score": "8-4",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2026-01-19",
+      "time": "8:40 PM",
       "home": "Pharaohs",
-      "away": "L (0 - 3)",
-      "opponent": "L (0 - 3)"
+      "away": "Chiefs",
+      "opponent": "Chiefs",
+      "score": "4-2",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Dragons",
-      "away": "L (8 - 4)",
-      "opponent": "Dragons vs L (8 - 4)"
+      "date": "2026-01-31",
+      "time": "10:40 PM",
+      "home": "Blue Crabs",
+      "away": "Pharaohs",
+      "opponent": "Blue Crabs",
+      "score": "4-2",
+      "result": "W",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Chiefs",
-      "away": "L (4 - 2)",
-      "opponent": "Chiefs vs L (4 - 2)"
-    },
-    {
-      "date": null,
+      "date": "2026-02-15",
+      "time": "4:55 PM",
       "home": "Pharaohs",
-      "away": "W (4 - 2)",
-      "opponent": "W (4 - 2)"
+      "away": "D 4th Liners",
+      "opponent": "D 4th Liners",
+      "score": "12-4",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "D 4th Liners",
-      "away": "L (12 - 4)",
-      "opponent": "D 4th Liners vs L (12 - 4)"
-    },
-    {
-      "date": null,
-      "home": "Punishers HC",
-      "away": "L (4 - 1)",
-      "opponent": "Punishers HC vs L (4 - 1)"
-    },
-    {
-      "date": null,
+      "date": "2026-03-01",
+      "time": "7:00 AM",
       "home": "Pharaohs",
-      "away": "L (4 - 6)",
-      "opponent": "L (4 - 6)"
+      "away": "Punishers HC",
+      "opponent": "Punishers HC",
+      "score": "4-1",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2026-03-03",
+      "time": "11:15 PM",
+      "home": "Outlaws",
+      "away": "Pharaohs",
+      "opponent": "Outlaws",
+      "score": "4-6",
+      "result": "L",
+      "playoffs": false
+    },
+    {
+      "date": "2026-03-15",
+      "time": "7:00 AM",
+      "home": "British Bulldogs",
+      "away": "Pharaohs",
+      "opponent": "British Bulldogs",
+      "score": "1-4",
+      "result": "L",
+      "playoffs": false
+    },
+    {
+      "date": "2026-03-23",
+      "time": "10:00 PM",
       "home": "Pharaohs",
-      "away": "L (1 - 4)",
-      "opponent": "L (1 - 4)"
+      "away": "Dragons",
+      "opponent": "Dragons",
+      "score": "9-4",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Dragons",
-      "away": "L (9 - 4)",
-      "opponent": "Dragons vs L (9 - 4)"
-    },
-    {
-      "date": null,
-      "home": "Chiefs",
-      "away": "W (5 - 6)",
-      "opponent": "Chiefs vs W (5 - 6)"
-    },
-    {
-      "date": null,
+      "date": "2026-03-29",
+      "time": "8:55 PM",
       "home": "Pharaohs",
-      "away": "W (5 - 3)",
-      "opponent": "W (5 - 3)"
+      "away": "Chiefs",
+      "opponent": "Chiefs",
+      "score": "5-6",
+      "result": "W",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "D 4th Liners",
-      "away": "L (10 - 4)",
-      "opponent": "D 4th Liners vs L (10 - 4)"
+      "date": "2026-04-03",
+      "time": "10:10 PM",
+      "home": "Blue Crabs",
+      "away": "Pharaohs",
+      "opponent": "Blue Crabs",
+      "score": "5-3",
+      "result": "W",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2026-04-06",
+      "time": "7:20 PM",
       "home": "Pharaohs",
-      "away": "L (4 - 13)",
-      "opponent": "L (4 - 13)"
+      "away": "D 4th Liners",
+      "opponent": "D 4th Liners",
+      "score": "10-4",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
+      "date": "2026-04-26",
+      "time": "10:40 PM",
+      "home": "Nortec",
+      "away": "Pharaohs",
+      "opponent": "Nortec",
+      "score": "4-13",
+      "result": "L",
+      "playoffs": false
+    },
+    {
+      "date": "2026-05-09",
+      "time": "7:00 AM",
+      "home": "Outlaws",
+      "away": "Pharaohs",
+      "opponent": "Outlaws",
+      "score": "5-9",
+      "result": "L",
+      "playoffs": false
+    },
+    {
+      "date": "2026-05-17",
+      "time": "7:00 AM",
       "home": "Pharaohs",
-      "away": "L (5 - 9)",
-      "opponent": "L (5 - 9)"
+      "away": "Dragons",
+      "opponent": "Dragons",
+      "score": "7-6",
+      "result": "L",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Dragons",
-      "away": "L (7 - 6)",
-      "opponent": "Dragons vs L (7 - 6)"
-    },
-    {
-      "date": null,
-      "home": "D 4th Liners",
-      "away": "W (3 - 4)",
-      "opponent": "D 4th Liners vs W (3 - 4)"
-    },
-    {
-      "date": null,
+      "date": "2026-05-23",
+      "time": "10:10 PM",
       "home": "Pharaohs",
-      "away": "W (5 - 4)",
-      "opponent": "W (5 - 4)"
+      "away": "D 4th Liners",
+      "opponent": "D 4th Liners",
+      "score": "3-4",
+      "result": "W",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": ">",
-      "away": "",
-      "opponent": ">"
+      "date": "2026-05-30",
+      "time": "6:50 PM",
+      "home": "Nortec",
+      "away": "Pharaohs",
+      "opponent": "Nortec",
+      "score": "5-4",
+      "result": "W",
+      "playoffs": false
     },
     {
-      "date": null,
-      "home": "Tue",
-      "away": "Wed",
-      "opponent": "Tue vs Wed"
+      "bracketGame": "A",
+      "date": "2026-06-12",
+      "time": "11:30 PM",
+      "home": "Chiefs (Place 8)",
+      "away": "Pharaohs (Place 9)",
+      "opponent": "Chiefs (Place 8)",
+      "score": "",
+      "result": "",
+      "playoffs": true
     },
     {
-      "date": null,
-      "home": "2June 2, 2026",
-      "away": "3June 3, 2026",
-      "opponent": "2June 2, 2026 vs 3June 3, 2026"
+      "bracketGame": "B",
+      "date": "2026-06-14",
+      "time": "6:50 PM",
+      "home": "D 4th Liners (Place 1)",
+      "away": "Winner A",
+      "opponent": "D 4th Liners (Place 1)",
+      "score": "",
+      "result": "",
+      "playoffs": true
     },
     {
-      "date": null,
-      "home": "9June 9, 2026",
-      "away": "10June 10, 2026",
-      "opponent": "9June 9, 2026 vs 10June 10, 2026"
+      "bracketGame": "G",
+      "date": "2026-06-20",
+      "time": "5:30 PM",
+      "home": "Winner B",
+      "away": "Winner E",
+      "opponent": "Winner B",
+      "score": "",
+      "result": "",
+      "playoffs": true
     },
     {
-      "date": null,
-      "home": "16June 16, 2026",
-      "away": "17June 17, 2026",
-      "opponent": "16June 16, 2026 vs 17June 17, 2026"
+      "bracketGame": "H",
+      "date": "2026-06-21",
+      "time": "9:40 AM",
+      "home": "Winner F",
+      "away": "Winner G",
+      "opponent": "Winner F",
+      "score": "",
+      "result": "",
+      "playoffs": true
     },
     {
-      "date": null,
-      "home": "23June 23, 2026",
-      "away": "24June 24, 2026",
-      "opponent": "23June 23, 2026 vs 24June 24, 2026"
+      "bracketGame": "I",
+      "date": "2026-06-22",
+      "time": "8:40 PM",
+      "home": "Winner F",
+      "away": "Winner G",
+      "opponent": "Winner F",
+      "score": "",
+      "result": "",
+      "playoffs": true
     },
     {
-      "date": null,
-      "home": "30June 30, 2026",
-      "away": "1July 1, 2026",
-      "opponent": "30June 30, 2026 vs 1July 1, 2026"
-    },
-    {
-      "date": null,
-      "home": "7July 7, 2026",
-      "away": "8July 8, 2026",
-      "opponent": "7July 7, 2026 vs 8July 8, 2026"
+      "bracketGame": "J",
+      "date": "2026-06-28",
+      "time": "9:30 PM",
+      "home": "Winner F",
+      "away": "Winner G",
+      "opponent": "Winner F",
+      "score": "",
+      "result": "",
+      "playoffs": true
     }
   ],
-  "_updated": "2026-06-02T11:53:22.880Z"
+  "_updated": "2026-06-04T18:25:51.781Z"
 }

@@ -1,22 +1,22 @@
 /**
- * Pharaohs scraper
- * Pulls roster, schedule, and standings using direct URLs with query params.
+ * Pharaohs scraper — stiltweb.com
+ * Pulls regular season + playoff roster, schedule, and standings
+ * for the Pharaohs (team 1962, div 321) using plain HTTPS — no browser needed.
  *
  * Usage:  node scripts/scrape.js
  */
 
-import puppeteer from 'puppeteer'
+import https from 'https'
 import { writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATA_DIR = join(__dirname, '../src/data')
+const DATA_DIR  = join(__dirname, '../src/data')
 
 const BASE    = 'https://www.stiltweb.com/eLeague/fhl'
 const TEAM_ID = '1962'
 const DIV_ID  = '321'
-const EDGE    = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -26,248 +26,354 @@ function writeJson(filename, data) {
   console.log(`✓ Wrote ${filename}`)
 }
 
+// Get a session cookie then use it for all requests
+let sessionCookie = ''
+
+async function fetchHtml(path) {
+  return new Promise((resolve, reject) => {
+    const url = path.startsWith('http') ? path : `${BASE}/${path}`
+    const req = https.get(url, {
+      headers: {
+        Referer: `${BASE}/`,
+        Cookie: sessionCookie,
+      }
+    }, res => {
+      // Capture session cookie on first response
+      if (!sessionCookie && res.headers['set-cookie']) {
+        sessionCookie = res.headers['set-cookie']
+          .map(c => c.split(';')[0])
+          .join('; ')
+      }
+      // Follow redirects
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchHtml(res.headers.location).then(resolve).catch(reject)
+      }
+      let d = ''
+      res.on('data', c => d += c)
+      res.on('end', () => resolve(d))
+    })
+    req.on('error', reject)
+    req.setTimeout(15000, () => { req.destroy(); reject(new Error(`Timeout: ${url}`)) })
+  })
+}
+
+// Extract all tables with class='standings' from HTML, handling nested tables
+function extractStandingsTables(html) {
+  const tables = []
+
+  // Find all opening tags for standings tables
+  const openRe = /<[Tt][Aa][Bb][Ll][Ee][^>]*class='standings'[^>]*>/g
+  let m
+  while ((m = openRe.exec(html)) !== null) {
+    // Walk forward counting <table> opens and closes to find the matching </table>
+    let depth = 1
+    let pos = m.index + m[0].length
+    while (depth > 0 && pos < html.length) {
+      const nextOpen  = html.indexOf('<', pos)
+      if (nextOpen === -1) break
+      const tag = html.slice(nextOpen, nextOpen + 8).toLowerCase()
+      if (tag.startsWith('<table')) { depth++; pos = nextOpen + 6 }
+      else if (tag.startsWith('</table')) { depth--; pos = nextOpen + 8 }
+      else pos = nextOpen + 1
+    }
+    const tableHtml = html.slice(m.index, pos)
+
+    // Parse rows from this table
+    const rows = []
+    for (const row of tableHtml.matchAll(/<[Tt][Rr][^>]*>([\s\S]*?)<\/[Tt][Rr]>/gi)) {
+      const cells = []
+      for (const cell of row[1].matchAll(/<[Tt][HhDd][^>]*>([\s\S]*?)<\/[Tt][HhDd]>/gi)) {
+        cells.push(
+          cell[1]
+            .replace(/<[^>]+>/g, '')
+            .replace(/&nbsp;/g, '')
+            .replace(/&amp;/g, '&')
+            .trim()
+        )
+      }
+      if (cells.some(c => c)) rows.push(cells)
+    }
+    if (rows.length > 1) tables.push(rows)
+  }
+  return tables
+}
+
+function tableToObjects(rows) {
+  if (rows.length < 2) return []
+  const headers = rows[0].map(h => h.toLowerCase().replace(/[^a-z0-9%]/g, ''))
+  return rows.slice(1).map(row => {
+    const obj = {}
+    headers.forEach((h, i) => { obj[h] = row[i] ?? '' })
+    return obj
+  })
+}
+
 function parseDate(raw) {
   if (!raw) return null
-  const cleaned = raw.trim()
-  const full = cleaned.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
-  if (full) {
-    const [, m, d, y] = full
-    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
-  }
-  const short = cleaned.match(/(\d{1,2})\/(\d{1,2})/)
-  if (short) {
-    const year = new Date().getFullYear()
-    const [, m, d] = short
-    return `${year}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
-  }
-  return null
+  // "Monday, December 1, 2025 7:20 PM" or "12/01/2025"
+  const long = raw.match(/(\w+),\s+(\w+)\s+(\d+),\s+(\d{4})\s+([\d:]+\s*[AP]M)/i)
+  if (long) return `${long[4]}-${monthNum(long[2])}-${long[3].padStart(2,'0')}`
+  const mdy = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (mdy) return `${mdy[3]}-${mdy[1].padStart(2,'0')}-${mdy[2].padStart(2,'0')}`
+  return raw.trim()
 }
 
-// Wait for at least one table with data rows to appear
-async function waitForTable(page, timeout = 10000) {
-  try {
-    await page.waitForFunction(
-      () => [...document.querySelectorAll('table')].some(t => t.rows.length > 1),
-      { timeout }
-    )
-  } catch {
-    console.warn('Timed out waiting for table — proceeding anyway')
-  }
+function parseTime(raw) {
+  const t = raw?.match(/(\d+:\d+\s*[AP]M)/i)
+  return t ? t[1] : ''
 }
 
-async function parseTables(page) {
-  return page.$$eval('table', tables =>
-    tables.map(t =>
-      Array.from(t.querySelectorAll('tr')).map(r =>
-        Array.from(r.querySelectorAll('th, td')).map(c => c.textContent.trim())
-      )
-    ).filter(rows => rows.length > 1)
-  )
+function monthNum(name) {
+  const months = { january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',
+                   july:'07',august:'08',september:'09',october:'10',november:'11',december:'12' }
+  return months[name.toLowerCase()] ?? '01'
 }
 
-function headersFromRow(row) {
-  return row.map(c => c.toLowerCase().replace(/[^a-z0-9]/g, ''))
-}
+function isPharaoh(t) { return t?.toLowerCase().includes('phar') ?? false }
 
-// ── Scrape roster ──────────────────────────────────────────────────────────
+// ── Roster ─────────────────────────────────────────────────────────────────
 
-async function scrapeRoster(page) {
-  console.log('Scraping roster...')
-  await page.goto(`${BASE}/rosters.php?team=${TEAM_ID}`, { waitUntil: 'networkidle2', timeout: 30000 })
-  await waitForTable(page)
-
+function parseRosterHtml(html) {
+  const tables = extractStandingsTables(html)
   const players = []
-  try {
-    const tables = await parseTables(page)
-    for (const tableData of tables) {
-      let headers = []
-      for (const row of tableData) {
-        const isHeader = row.some(c => /^(#|no\.?|num|name|pos)/i.test(c))
-        if (isHeader && !headers.length) { headers = headersFromRow(row); continue }
-        if (headers.length && row.some(c => c !== '')) {
-          const p = {}
-          headers.forEach((h, i) => {
-            const val = row[i] ?? ''
-            if (/^#$|^no$|^num/.test(h))   p.number   = val.replace('#', '')
-            else if (/name/.test(h))        p.name     = val
-            else if (/pos/.test(h))         p.position = val.toUpperCase()
-            else if (/shoot/.test(h))       p.shoots   = val
-            else if (/^gp$/.test(h))        p.gp       = parseInt(val) || 0
-            else if (/^g$/.test(h))         p.g        = parseInt(val) || 0
-            else if (/^a$/.test(h))         p.a        = parseInt(val) || 0
-            else if (/pts|points/.test(h))  p.pts      = parseInt(val) || 0
-            else if (/pim/.test(h))         p.pim      = parseInt(val) || 0
-          })
-          if (p.name) players.push(p)
-        }
-      }
-      if (players.length) break
-    }
-  } catch (e) {
-    console.warn('Roster parse error:', e.message)
-  }
+  const goalies = []
 
-  writeJson('roster.json', { players })
-  return players.length
+  for (const tableRows of tables) {
+    const headers = tableRows[0].map(h => h.toLowerCase())
+    const isGoalie = headers.includes('gaa') || headers.includes('sv%') || headers.includes('sv')
+    const objs = tableToObjects(tableRows)
+
+    for (const p of objs) {
+      if (!p['name']) continue
+      if (isGoalie) {
+        goalies.push({
+          number: p['#'] || '',
+          name: p['name'],
+          gp: parseInt(p['gp']) || 0,
+          w: parseInt(p['w']) || 0,
+          l: parseInt(p['l']) || 0,
+          t: parseInt(p['t']) || 0,
+          ga: parseInt(p['ga']) || 0,
+          sa: parseInt(p['sa']) || 0,
+          sv: parseInt(p['sv']) || 0,
+          svpct: p['sv%'] || '',
+          gaa: p['gaa'] || '',
+          so: parseInt(p['so']) || 0,
+          pim: parseInt(p['pim']) || 0,
+        })
+      } else {
+        players.push({
+          number: p['#'] || '',
+          name: p['name'],
+          position: '',
+          gp: parseInt(p['gp']) || 0,
+          g: parseInt(p['g']) || 0,
+          a: parseInt(p['a']) || 0,
+          pts: parseInt(p['pts']) || 0,
+          ppg: parseInt(p['ppg']) || 0,
+          ppa: parseInt(p['ppa']) || 0,
+          shg: parseInt(p['shg']) || 0,
+          sha: parseInt(p['sha']) || 0,
+          pim: parseInt(p['pim']) || 0,
+        })
+      }
+    }
+  }
+  return { players, goalies }
 }
 
-// ── Scrape schedule ────────────────────────────────────────────────────────
+// ── Schedule ───────────────────────────────────────────────────────────────
 
-async function scrapeSchedule(page) {
-  console.log('Scraping schedule...')
-  await page.goto(`${BASE}/schedule.php?team=${TEAM_ID}&div=${DIV_ID}`, { waitUntil: 'networkidle2', timeout: 30000 })
-  await waitForTable(page)
+function parseScheduleHtml(html, isPlayoffs = false) {
+  const tables = extractStandingsTables(html)
 
-  const games = []
-  try {
-    const tables = await parseTables(page)
-    for (const tableData of tables) {
-      let headers = []
-      for (const row of tableData) {
-        const isHeader = row.some(c => /date|time|home|away|opponent/i.test(c))
-        if (isHeader && !headers.length) { headers = headersFromRow(row); continue }
-        if (headers.length && row.some(c => c !== '')) {
-          const g = {}
-          headers.forEach((h, i) => {
-            const val = row[i] ?? ''
-            if (/date/.test(h))              g.date     = parseDate(val)
-            else if (/time/.test(h))         g.time     = val
-            else if (/home/.test(h))         g.home     = val
-            else if (/away|visit/.test(h))   g.away     = val
-            else if (/oppon|vs/.test(h))     g.opponent = val
-            else if (/score|result/.test(h)) g.score    = val
-            else if (/rink|ice|sheet/.test(h)) g.rink   = val
-          })
-          if (!g.opponent && (g.home || g.away)) {
-            const isPharaoh = t => t?.toLowerCase().includes('pharaoh')
-            if (isPharaoh(g.home))      g.opponent = g.away
-            else if (isPharaoh(g.away)) g.opponent = g.home
-            else                        g.opponent = [g.home, g.away].filter(Boolean).join(' vs ')
-          }
-          if (g.score && !g.result) {
-            const m = g.score.match(/(\d+)\s*[-–]\s*(\d+)/)
-            if (m) {
-              const weAreHome = g.home?.toLowerCase().includes('pharaoh')
-              const ours   = parseInt(weAreHome ? m[1] : m[2])
-              const theirs = parseInt(weAreHome ? m[2] : m[1])
-              g.result = ours > theirs ? 'W' : ours < theirs ? 'L' : 'T'
-            }
-          }
-          if (g.date || g.opponent) games.push(g)
-        }
+  if (!isPlayoffs) {
+    // Regular season — simple parse, no bracket logic needed
+    const games = []
+    for (const tableRows of tables) {
+      const headers = tableRows[0].map(h => h.toLowerCase())
+      if (!headers.some(h => /date|home|away/i.test(h))) continue
+      for (const g of tableToObjects(tableRows)) {
+        const game = parseGameRow(g, false)
+        if (game) games.push(game)
       }
       if (games.length) break
     }
-  } catch (e) {
-    console.warn('Schedule parse error:', e.message)
+    return games
   }
 
-  writeJson('schedule.json', { games })
-  return games.length
-}
+  // ── Playoff bracket traversal ──
+  // The schedule has a letter label column (A, B, C...) before Date
+  // Find which game letters involve Pharaohs, then recursively follow "Winner X" references
 
-// ── Scrape standings ───────────────────────────────────────────────────────
+  // First pass: parse ALL games with their letter labels
+  const allGames = []
+  for (const tableRows of tables) {
+    const headers = tableRows[0].map(h => h.toLowerCase())
+    if (!headers.some(h => /date|home|away/i.test(h))) continue
 
-async function scrapeStandings(page) {
-  console.log('Scraping standings...')
+    // Check if there's a label column (single letter like A, B, C)
+    const hasLabel = /^[a-z]$/i.test(tableRows[1]?.[0] ?? '')
 
-  // Intercept the AJAX request the dropdown triggers to get the URL pattern
-  let ajaxUrl = null
-  page.on('request', req => {
-    const url = req.url()
-    if (url.includes('actions.php') || url.includes('standings')) {
-      console.log('AJAX request intercepted:', url)
-      ajaxUrl = url
+    for (const row of tableRows.slice(1)) {
+      let label = '', dateIdx = 0
+      if (hasLabel) { label = row[0]?.trim().toUpperCase(); dateIdx = 1 }
+
+      const g = {}
+      const headerOffset = hasLabel ? 1 : 0
+      const effectiveHeaders = tableRows[0].slice(headerOffset).map(h => h.toLowerCase())
+      effectiveHeaders.forEach((h, i) => {
+        const val = row[i + headerOffset] ?? ''
+        if (/date/i.test(h))       g.date   = val
+        else if (/home/i.test(h))  g.home   = val
+        else if (/away/i.test(h))  g.away   = val
+        else if (/recap/i.test(h)) g.recap  = val
+      })
+
+      if (g.date || g.home || g.away) {
+        allGames.push({ label, ...g })
+      }
     }
-  })
+    if (allGames.length) break
+  }
 
-  await page.goto(`${BASE}/standings.php`, { waitUntil: 'networkidle2', timeout: 30000 })
+  if (allGames.length === 0) return []
 
-  // Dump the form structure to understand how the dropdown submits
-  try {
-    await page.waitForSelector('#select-league-drop', { timeout: 8000 })
-    const formInfo = await page.evaluate(() => {
-      const sel = document.getElementById('select-league-drop')
-      const form = sel.closest('form')
-      const onchange = sel.getAttribute('onchange')
-      const onclick = sel.getAttribute('onclick')
+  // Second pass: find which game labels the Pharaohs are directly in
+  const relevantLabels = new Set()
+  for (const g of allGames) {
+    if (isPharaoh(g.home) || isPharaoh(g.away)) {
+      if (g.label) relevantLabels.add(g.label)
+    }
+  }
+
+  // Third pass: recursively add games that reference a relevant label
+  // e.g. "Winner A" in home/away pulls in that game's label too
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const g of allGames) {
+      if (!g.label || relevantLabels.has(g.label)) continue
+      // Check if home or away references a game we already care about
+      const homeRef = g.home?.match(/Winner\s+([A-Z])/i)?.[1]?.toUpperCase()
+      const awayRef = g.away?.match(/Winner\s+([A-Z])/i)?.[1]?.toUpperCase()
+      if ((homeRef && relevantLabels.has(homeRef)) ||
+          (awayRef && relevantLabels.has(awayRef))) {
+        relevantLabels.add(g.label)
+        changed = true
+      }
+    }
+  }
+
+  // Final pass: convert relevant games to output format
+  return allGames
+    .filter(g => !g.label || relevantLabels.has(g.label))
+    .map(g => {
+      const weAreHome = isPharaoh(g.home)
+      const opponent  = weAreHome ? g.away : g.home
+      let result = '', score = ''
+      const recap = g.recap || ''
+      const wl  = recap.match(/^([WL])\s*\((\d+)\s*-\s*(\d+)\)/i)
+      const tie = recap.match(/tie\s+(\d+)\s*-\s*(\d+)/i)
+      if (wl)       { result = wl[1].toUpperCase(); score = `${wl[2]}-${wl[3]}` }
+      else if (tie) { result = 'T'; score = `${tie[1]}-${tie[2]}` }
+      else if (recap.toLowerCase().includes('forfeit')) { result = isPharaoh(recap.split(' ')[0]) ? 'W' : 'L' }
       return {
-        onchange,
-        onclick,
-        formAction: form ? form.action : null,
-        formMethod: form ? form.method : null,
-        outerHTML: sel.outerHTML.slice(0, 300),
-        parentHTML: sel.parentElement?.outerHTML?.slice(0, 500),
+        bracketGame: g.label || '',
+        date: parseDate(g.date),
+        time: parseTime(g.date),
+        home: g.home,
+        away: g.away,
+        opponent,
+        score,
+        result,
+        playoffs: true,
       }
     })
-    console.log('Form info:', JSON.stringify(formInfo, null, 2))
-  } catch(e) {
-    console.warn(e.message)
-  }
-
-  const bodySnippet = await page.$eval('body', el => el.innerText.slice(0, 800))
-  console.log('Page after selection:\n', bodySnippet)
-
-  const standings = []
-  try {
-    const tables = await parseTables(page)
-    console.log(`Found ${tables.length} tables on standings page`)
-    for (const tableData of tables) {
-      let headers = []
-      for (const row of tableData) {
-        const isHeader = row.some(c => /^(team|name|pts|points|wins|losses)/i.test(c)) &&
-                         row.some(c => /^(w|wins|pts|points|gp)/i.test(c))
-        if (isHeader && !headers.length) { headers = headersFromRow(row); continue }
-        if (headers.length && row.length >= 3 && row.some(c => c !== '')) {
-          const e = {}
-          headers.forEach((h, i) => {
-            const val = row[i] ?? ''
-            if (/team|name/.test(h))        e.team = val
-            else if (/^gp$/.test(h))        e.gp   = parseInt(val) || 0
-            else if (/^w$/.test(h))         e.w    = parseInt(val) || 0
-            else if (/^l$/.test(h))         e.l    = parseInt(val) || 0
-            else if (/^t$|tie/.test(h))     e.t    = parseInt(val) || 0
-            else if (/pts|points/.test(h))  e.pts  = parseInt(val) || 0
-            else if (/^gf$|goalsf/.test(h)) e.gf   = parseInt(val) || 0
-            else if (/^ga$|goalsa/.test(h)) e.ga   = parseInt(val) || 0
-          })
-          if (e.team) standings.push(e)
-        }
-      }
-      if (standings.length >= 5) break  // found the right table
-    }
-  } catch (e) {
-    console.warn('Standings parse error:', e.message)
-  }
-
-  writeJson('standings.json', { standings })
-  return standings.length
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────
+function parseGameRow(g, isPlayoffs) {
+  const home   = g['home'] || ''
+  const away   = g['away'] || ''
+  const recap  = g['recap'] || ''
+  const dateRaw = g['date'] || ''
+  if (!dateRaw && !home && !away) return null
+  const weAreHome = isPharaoh(home)
+  const opponent  = weAreHome ? away : home
+  let result = '', score = ''
+  const wl  = recap.match(/^([WL])\s*\((\d+)\s*-\s*(\d+)\)/i)
+  const tie = recap.match(/tie\s+(\d+)\s*-\s*(\d+)/i)
+  if (wl)       { result = wl[1].toUpperCase(); score = `${wl[2]}-${wl[3]}` }
+  else if (tie) { result = 'T'; score = `${tie[1]}-${tie[2]}` }
+  else if (recap.toLowerCase().includes('forfeit')) { result = isPharaoh(recap.split(' ')[0]) ? 'W' : 'L' }
+  return { date: parseDate(dateRaw), time: parseTime(dateRaw), home, away, opponent, score, result, playoffs: isPlayoffs }
+}
+
+// ── Standings ──────────────────────────────────────────────────────────────
+
+function parseStandingsHtml(html) {
+  const tables = extractStandingsTables(html)
+  for (const tableRows of tables) {
+    const headers = tableRows[0].map(h => h.toLowerCase())
+    if (!headers.some(h => /team|name/i.test(h))) continue
+    const objs = tableToObjects(tableRows)
+    const standings = objs.map(t => ({
+      team: t['team'] || t['name'] || '',
+      gp:  parseInt(t['gp'])  || 0,
+      w:   parseInt(t['w'])   || 0,
+      l:   parseInt(t['l'])   || 0,
+      t:   parseInt(t['t'])   || 0,
+      pts: parseInt(t['pts']) || 0,
+      gf:  parseInt(t['gf'])  || 0,
+      ga:  parseInt(t['ga'])  || 0,
+    })).filter(t => t.team)
+    if (standings.length) return standings
+  }
+  return []
+}
+
+// ── Main scrape ────────────────────────────────────────────────────────────
 
 async function main() {
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: EDGE,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  })
-  const page = await browser.newPage()
-  await page.setUserAgent(
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-  )
+  // ── Establish session first ──
+  console.log('Establishing session...')
+  await fetchHtml(`schedule.php?team=${TEAM_ID}`)
+  console.log('Session cookie:', sessionCookie)
 
-  try {
-    const rosterCount    = await scrapeRoster(page)
-    const scheduleCount  = await scrapeSchedule(page)
-    const standingsCount = await scrapeStandings(page)
-    console.log(`\nDone. Roster: ${rosterCount} players | Schedule: ${scheduleCount} games | Standings: ${standingsCount} teams`)
-  } catch (err) {
-    console.error('Scrape failed:', err)
-    process.exit(1)
-  } finally {
-    await browser.close()
-  }
+  // ── Regular season roster ──
+  console.log('Scraping regular season roster...')
+  const rsRosterHtml = await fetchHtml(`rosters.php?team=${TEAM_ID}`)
+  const { players, goalies } = parseRosterHtml(rsRosterHtml)
+  writeJson('roster.json', { players, goalies })
+
+  // ── Playoff roster ──
+  console.log('Scraping playoff roster...')
+  const poRosterHtml = await fetchHtml(`actions.php?playoffs=yes&page=rosters&team=${TEAM_ID}&div=${DIV_ID}`)
+  const { players: poPlayers, goalies: poGoalies } = parseRosterHtml(poRosterHtml)
+  writeJson('rosterPlayoffs.json', { players: poPlayers, goalies: poGoalies })
+
+  // ── Regular season schedule ──
+  console.log('Scraping regular season schedule...')
+  const rsSchedHtml = await fetchHtml(`actions.php?playoffs=no&page=schedule&team=${TEAM_ID}&div=${DIV_ID}`)
+  const rsGames = parseScheduleHtml(rsSchedHtml, false)
+
+  // ── Playoff schedule ──
+  console.log('Scraping playoff schedule...')
+  const poSchedHtml = await fetchHtml(`actions.php?playoffs=yes&page=schedule&team=&div=${DIV_ID}`)
+  const poGames = parseScheduleHtml(poSchedHtml, true)
+
+  writeJson('schedule.json', { games: [...rsGames, ...poGames] })
+
+  // ── Standings ──
+  console.log('Scraping standings...')
+  const standHtml = await fetchHtml(`actions.php?playoffs=no&page=standings&team=&div=${DIV_ID}`)
+  const standings = parseStandingsHtml(standHtml)
+  writeJson('standings.json', { standings })
+
+  console.log(`\nDone.`)
+  console.log(`  Regular season: ${players.length} skaters, ${goalies.length} goalies, ${rsGames.length} games`)
+  console.log(`  Playoffs:       ${poPlayers.length} skaters, ${poGoalies.length} goalies, ${poGames.length} games`)
+  console.log(`  Standings:      ${standings.length} teams`)
 }
 
-main()
+main().catch(e => { console.error('Scrape failed:', e); process.exit(1) })

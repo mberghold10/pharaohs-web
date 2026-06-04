@@ -1,0 +1,31 @@
+.jerseys-page {
+  padding-bottom: 60px;
+}
+
+.jerseys-coming-soon {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.coming-soon-body {
+  text-align: center;
+  padding: 60px 32px;
+}
+
+.coming-soon-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.coming-soon-title {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.coming-soon-text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}

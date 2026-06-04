@@ -146,6 +146,13 @@
   background: var(--accent);
 }
 
+/* Ensure hamburger is always visible against the header */
+@media (max-width: 640px) {
+  .hamburger span {
+    background: var(--accent);
+  }
+}
+
 /* ── Main ── */
 .main {
   flex: 1;

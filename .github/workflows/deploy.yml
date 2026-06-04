@@ -45,8 +45,14 @@ jobs:
 
       - name: Run scraper
         run: npm run scrape
-        # Don't fail the whole deploy if scraping has issues —
-        # the existing JSON files in the repo serve as fallback
+        continue-on-error: true
+
+      - name: Run history scraper
+        run: npm run scrape:history
+        continue-on-error: true
+
+      - name: Run stiltweb historical scraper
+        run: npm run scrape:stiltweb
         continue-on-error: true
 
       - name: Build

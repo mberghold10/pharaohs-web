@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "scrape": "node scripts/scrape.js"
+    "scrape": "node scripts/scrape.js",
+    "scrape:history": "node scripts/scrapeHistory.js",
+    "scrape:stiltweb": "node scripts/scrapeStiltweb.js",
+    "scrape:all": "node scripts/scrape.js && node scripts/scrapeHistory.js && node scripts/scrapeStiltweb.js"
   },
   "dependencies": {
     "react": "18.2.0",

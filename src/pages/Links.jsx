@@ -13,33 +13,27 @@ const LINK_GROUPS = [
     ],
   },
   {
+    title: 'League',
     links: [
       { label: 'Team Roster', url: 'https://www.stiltweb.com/eLeague/fhl/rosters.php?team=1962', desc: 'Pharaohs player roster' },
       { label: 'Team Schedule', url: 'https://www.stiltweb.com/eLeague/fhl/schedule.php?team=1962', desc: 'Pharaohs game schedule and results' },
-    ],
-  },
-  {
-    title: 'League',
-    links: [
       { label: 'FHL Home', url: 'https://www.stiltweb.com/eLeague/fhl/', desc: 'Fairfax Ice Arena Hockey League' },
-      { label: 'Standings', url: 'https://www.stiltweb.com/eLeague/fhl/standings.php', desc: 'Division C standings' },
-      { label: 'Schedule', url: 'https://www.stiltweb.com/eLeague/fhl/schedule.php', desc: 'Full season schedule' },
-      { label: 'Rosters', url: 'https://www.stiltweb.com/eLeague/fhl/rosters.php', desc: 'All team rosters' },
-      { label: 'Stats Leaders', url: 'https://www.stiltweb.com/eLeague/fhl/stats.php', desc: 'League scoring leaders' },
-      { label: 'Scores', url: 'https://www.stiltweb.com/eLeague/fhl/results.php', desc: 'Game results' },
-    ],
-  },
-  {
-    title: 'Rink',
-    links: [
       { label: 'Fairfax Ice Arena', url: 'https://www.fairfaxicearena.com/', desc: 'Rink info, hours, and contact' },
     ],
   },
   {
     title: 'Resources',
     links: [
+      { label: 'Player Lookup', url: 'https://nova-hockey.eastus.cloudapp.azure.com', desc: 'Look up player stats and history' },
+      { label: 'League History', url: 'https://russianrocket.net/', desc: 'Historical league records and stats' },
       { label: 'USA Hockey Rules', url: 'https://www.usahockey.com/page/show/839230-official-rules', desc: 'Official rule book' },
-      { label: 'Hockey Reference', url: 'https://www.hockey-reference.com/', desc: 'Stats and records' },
+    ],
+  },
+  {
+    title: 'Miscellaneous',
+    links: [
+      { label: 'Donate to St. Jude', url: 'https://www.stjude.org/donate/donate-to-st-jude.html', desc: 'Support St. Jude Children\'s Research Hospital' },
+      { label: 'Pornhub', url: 'https://www.pornhub.com', desc: 'VPN required 🔒' },
     ],
   },
 ]
@@ -57,7 +51,7 @@ export default function Links() {
             <div className="link-list">
               {group.links.map((link) => (
                 <a
-                  key={link.url}
+                  key={link.label}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"

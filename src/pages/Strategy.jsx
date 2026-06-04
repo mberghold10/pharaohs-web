@@ -84,11 +84,86 @@ When we're defending through the neutral zone, collapse and re-group beats tryin
       },
     ],
   },
+  {
+    id: 'scenarios',
+    title: 'Scenarios',
+    icon: '📐',
+    subsections: [
+      {
+        title: '2-on-1',
+        content: `The defending D must respect both options without fully committing to either. Take away the pass lane first — angle your body to force the puck carrier to shoot, then trust your goalie.
+
+Key rules:
+• Stay between the puck and the slot — don't chase the carrier to the wall
+• Do NOT dive or lunge; a patient stick can disrupt the pass
+• The trailing forward should sprint back and be ready for a rebound or second chance
+• Goalie tracks the puck carrier, squares up, and only moves on the shot`,
+        callout: { type: 'rule', text: 'D takes the pass. Goalie takes the shot. Communicate it early.' },
+      },
+      {
+        title: '3-on-1',
+        content: `A 3-on-1 is a breakdown situation — damage control is the goal.
+
+• The lone D retreats to the top of the crease, forcing the play wide
+• Do NOT try to intercept a cross-ice pass; stay central and make them go around
+• The D's job is to slow the play and buy time for backcheckers to arrive
+• The goalie must be aggressive and cut down angle — a long shot is a better outcome than a wide-open tap-in`,
+        callout: { type: 'rule', text: 'Lone D: stay central, slow it down, do not gamble. Backcheckers sprint.' },
+      },
+      {
+        title: '3-on-2',
+        content: `Two defenders against three attackers requires discipline and communication.
+
+• The two D drop back together in a tight tandem — do not spread wide prematurely
+• Force the puck to one side by angling the puck carrier; the other D reads and takes the weak-side threat
+• If the puck goes to the middle, both D collapse immediately
+• Do not let the middle man get a clean shot — one D pressures the puck, the other takes away the slot pass
+• Communicate constantly: "I've got the puck," "I've got the middle," etc.`,
+        callout: { type: 'tip', text: 'The worst outcome is both D going to the puck. Stay disciplined and communicate.' },
+      },
+    ],
+  },
+  {
+    id: 'special-teams',
+    title: 'Special Teams',
+    icon: '⚡',
+    subsections: [
+      {
+        title: 'Power Play',
+        content: `On the power play we have a man advantage — use it to work the puck and create high-quality shots, not to rush.
+
+Key principles:
+• Set up with patience — don't force it
+• Move the puck quickly to shift the penalty killers out of position
+• One D at the point controls the blue line; the other D or a forward supports
+• Look for one-timers and cross-ice passes that force the PK to collapse
+• If the PK pressure comes, cycle back and reset — don't panic and ice the puck`,
+        callout: { type: 'tip', text: 'Shots from the point with traffic in front are your best friend. Get bodies to the net.' },
+      },
+      {
+        title: 'Penalty Kill',
+        content: `The penalty kill is about discipline, urgency, and protecting the middle of the ice.
+
+Key principles:
+• Form a box or diamond depending on positioning — always have shape
+• Take away the middle — force all plays to the outside
+• On puck pressure, one player attacks aggressively; the other three hold their positions
+• Don't chase — if you commit and miss, you've opened up the slot
+• Clear the puck at every opportunity — chips and ices are fine, a goal is not
+• If shorthanded, a shot from outside that misses the net is a good outcome`,
+        callout: { type: 'rule', text: 'Middle of the ice is sacred on the PK. Give up the perimeter, protect the slot.' },
+      },
+    ],
+  },
 ]
 
 export default function Strategy() {
   const [unlocked, setUnlocked] = useState(false)
   const [active, setActive] = useState(null)
+
+  const handleTabClick = (id) => {
+    setActive(prev => prev === id ? null : id)
+  }
 
   if (!unlocked) {
     return (
@@ -120,7 +195,7 @@ export default function Strategy() {
             <button
               key={s.id}
               className={`strategy-nav-btn ${active === s.id ? 'strategy-nav-btn--active' : ''}`}
-              onClick={() => setActive(active === s.id ? null : s.id)}
+              onClick={() => handleTabClick(s.id)}
             >
               <span className="nav-btn-icon" aria-hidden="true">{s.icon}</span>
               <span>{s.title}</span>

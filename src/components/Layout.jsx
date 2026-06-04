@@ -7,7 +7,10 @@ const NAV_LINKS = [
   { to: '/', label: 'Home', end: true },
   { to: '/roster', label: 'Roster' },
   { to: '/strategy', label: 'Strategy' },
+  { to: '/history', label: 'History' },
+  { to: '/jerseys', label: 'Jerseys' },
   { to: '/links', label: 'Links' },
+  { to: '/contribute', label: 'Contribute' },
 ]
 
 export default function Layout() {
