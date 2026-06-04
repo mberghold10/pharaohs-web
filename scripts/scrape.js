@@ -21,6 +21,18 @@ const DIV_ID  = '321'
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function writeJson(filename, data) {
+  // Don't overwrite with empty data — keep the last good scrape
+  const hasData = (
+    (data.players?.length > 0) ||
+    (data.games?.length > 0) ||
+    (data.standings?.length > 0) ||
+    (data.seasons?.length > 0) ||
+    (data.goalies?.length > 0)
+  )
+  if (!hasData) {
+    console.log(`⚠ Skipping ${filename} — no data returned (keeping existing file)`)
+    return
+  }
   const payload = { ...data, _updated: new Date().toISOString() }
   writeFileSync(join(DATA_DIR, filename), JSON.stringify(payload, null, 2))
   console.log(`✓ Wrote ${filename}`)
@@ -61,8 +73,8 @@ async function fetchHtml(path) {
 function extractStandingsTables(html) {
   const tables = []
 
-  // Find all opening tags for standings tables
-  const openRe = /<[Tt][Aa][Bb][Ll][Ee][^>]*class='standings'[^>]*>/g
+  // Find all opening tags for standings tables (handle single and double quotes)
+  const openRe = /<[Tt][Aa][Bb][Ll][Ee][^>]*class=['"]standings['"][^>]*>/g
   let m
   while ((m = openRe.exec(html)) !== null) {
     // Walk forward counting <table> opens and closes to find the matching </table>
@@ -335,9 +347,11 @@ function parseStandingsHtml(html) {
 // ── Main scrape ────────────────────────────────────────────────────────────
 
 async function main() {
-  // ── Establish session first ──
+  // ── Establish session and ensure regular season mode ──
   console.log('Establishing session...')
   await fetchHtml(`schedule.php?team=${TEAM_ID}`)
+  // Explicitly reset to regular season mode in case a previous run left playoff mode active
+  await fetchHtml(`actions.php?playoffs=no&page=schedule&team=${TEAM_ID}&div=${DIV_ID}`)
   console.log('Session cookie:', sessionCookie)
 
   // ── Regular season roster ──

@@ -350,6 +350,10 @@ async function main() {
   history.sort((a, b) => parseInt(b.seasonId) - parseInt(a.seasonId))
 
   const output = { _updated: new Date().toISOString(), seasons: history }
+  if (history.length === 0) {
+    console.log('\n⚠ No seasons found — keeping existing history.json')
+    return
+  }
   writeFileSync(join(DATA_DIR, 'history.json'), JSON.stringify(output, null, 2))
   console.log(`\n✓ Wrote history.json — ${history.length} Pharaohs season(s) found`)
 }

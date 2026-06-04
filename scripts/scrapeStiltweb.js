@@ -465,8 +465,12 @@ async function main() {
   }
 
   existing._updated = new Date().toISOString()
+  if (Object.keys(grouped).length === 0) {
+    console.log('\n⚠ No playoff data found — keeping existing history.json')
+    return
+  }
   writeFileSync(join(DATA_DIR, 'history.json'), JSON.stringify(existing, null, 2))
-  console.log(`\n✓ Updated history.json with ${playoffSeasons.length} playoff season(s)`)
+  console.log(`\n✓ Updated history.json with ${Object.keys(grouped).length} playoff season(s)`)
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1) })
