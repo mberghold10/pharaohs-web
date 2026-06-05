@@ -90,7 +90,22 @@ When we're defending through the neutral zone, collapse and re-group beats tryin
     icon: '📐',
     subsections: [
       {
-        title: '2-on-1',
+        title: '2-on-1 (Offensive)',
+        content: `On an offensive 2-on-1 rush, F1 carries the puck on the outside lane with F2 staggered back and inside — not skating beside F1, but trailing slightly behind and toward the middle.
+
+This stagger gives F1 two clean options:
+
+• **Shot** — when F1 reaches the circle, they shoot on net. F2 reads this and immediately drives hard to the net to collect the rebound.
+• **Pass** — F1 draws the defender and feeds F2 cutting through the middle. As soon as the pass is made, F1 crashes the net for the rebound or deflection.
+
+The key is F2's positioning. Too far ahead and the defender can cover both. Too far back and the pass lane closes. The stagger keeps both options alive until the last possible moment.`,
+        callout: {
+          type: 'tip',
+          text: 'F1 makes the decision at the circle. F2\'s job is to be in position for both options simultaneously — that\'s what the stagger creates.',
+        },
+      },
+      {
+        title: '2-on-1 (Defensive)',
         content: `The defending D must respect both options without fully committing to either. Take away the pass lane first — angle your body to force the puck carrier to shoot, then trust your goalie.
 
 Key rules:

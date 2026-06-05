@@ -472,3 +472,305 @@
   font-style: italic;
   opacity: 0.6;
 }
+
+/* ── All-Time Leaders ── */
+.alltime-section {
+  margin-bottom: 28px;
+}
+
+.alltime-title {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+}
+
+.alltime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.alltime-card .card-header h2 {
+  font-size: 0.9rem;
+}
+
+.rank-cell {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 24px;
+}
+
+.jersey-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* ── Player modal ── */
+.player-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.player-modal {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 28px 24px;
+}
+
+.player-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.player-modal-close:hover {
+  color: var(--text);
+}
+
+.player-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.player-modal-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--accent);
+  opacity: 0.4;
+  line-height: 1;
+}
+
+.player-modal-header h2 {
+  font-size: 1.4rem;
+}
+
+.player-modal-totals {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.modal-stat-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.modal-stat-key {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.player-modal-seasons-title {
+  font-size: 0.8rem;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* ── All-time leaders ── */
+.alltime-section {
+  margin-bottom: 8px;
+}
+
+.alltime-title {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+
+.alltime-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.leader-category .card-header h2 {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+.leader-rank {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  width: 28px;
+}
+
+/* ── Player profiles grid ── */
+.player-profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.profile-card {
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  transition: border-color 0.2s, transform 0.15s;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.profile-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.profile-card--goalie {
+  border-color: rgba(156, 39, 176, 0.2);
+}
+
+.profile-card--goalie:hover {
+  border-color: #ce93d8;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.profile-stats strong {
+  color: var(--accent);
+}
+
+/* ── Player card modal ── */
+.player-card-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.player-card-modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.player-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.player-card-name {
+  font-size: 1.4rem;
+}
+
+.player-card-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  display: block;
+  margin-top: 2px;
+}
+
+.player-card-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.player-card-close:hover {
+  color: var(--text);
+}
+
+.player-totals {
+  display: flex;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.ptotal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ptotal-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.ptotal-key {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
