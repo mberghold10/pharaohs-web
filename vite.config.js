@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/pharaohs-web/', // GitHub Pages repo name
+  base: '/', // Custom domain serves from root
 })
