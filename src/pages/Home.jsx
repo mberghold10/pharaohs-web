@@ -35,7 +35,7 @@ export default function Home() {
         <div className="hero-inner">
           <div className="hero-badge">Winter 2025 · Division C</div>
           <img
-            src={theme === 'dark' ? '/pharaohs-web/logo-dark.jpg' : '/pharaohs-web/logo-light.png'}
+            src={theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.png'}
             alt="Pharaohs Hockey"
             className="hero-logo"
           />

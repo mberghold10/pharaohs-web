@@ -23,7 +23,7 @@ export default function Layout() {
         <div className="header-inner">
           <NavLink to="/" className="brand">
             <img
-                src={theme === 'dark' ? '/pharaohs-web/logo-dark.jpg' : '/pharaohs-web/logo-light.png'}
+                src={theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.png'}
                 alt="Pharaohs Hockey"
                 className="brand-logo"
               />
