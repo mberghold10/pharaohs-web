@@ -28,15 +28,15 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true)
 
   useEffect(() => {
-    // Step 1: fetch pharaohs.json to get current season's divId and teamId
+    // Step 1: fetch pharaohs.json to get current season's divId and teamIds
     fetch(`${ARCHIVE_BASE}/data/teams/pharaohs.json`)
       .then(r => r.ok ? r.json() : null)
       .then(team => {
         if (!team?.seasons?.length) { setLoadingData(false); return }
         const current = team.seasons[0] // most recent first
         const divId = current.divId
-        const teamId = team.teamIds?.[0] || ''
-        setCurrentSeason({ ...current, teamId })
+        const pharaohsIds = new Set((team.teamIds || []).map(String))
+        setCurrentSeason({ ...current })
 
         // Step 2: fetch current division data
         const base = `${ARCHIVE_BASE}/data/divisions/${divId}`
@@ -48,14 +48,18 @@ export default function Home() {
           const scoreMap = scores?.scores || {}
           const parsedGames = (schedule?.records || []).map(g => {
             const score = scoreMap[g.gameId]
-            const weAreHome = g.home?.teamId === teamId
+            // Use authoritative teamIds from scores.json
+            const homeTeamId = String(score?.homeTeamId || g.home?.teamId || '')
+            const awayTeamId = String(score?.awayTeamId || g.away?.teamId || '')
+            const weAreHome = pharaohsIds.has(homeTeamId)
+            const pharTeamId = weAreHome ? homeTeamId : awayTeamId
             const opponent = weAreHome ? g.away?.name : g.home?.name
             let result = null, scoreStr = null
             if (score) {
               const ourScore = weAreHome ? score.homeScore : score.awayScore
               const theirScore = weAreHome ? score.awayScore : score.homeScore
               scoreStr = `${ourScore}-${theirScore}`
-              result = score.tie ? 'T' : score.winnerTeamId === teamId ? 'W' : 'L'
+              result = score.tie ? 'T' : score.winnerTeamId === pharTeamId ? 'W' : 'L'
             }
             return { date: g.date, time: g.time || '', home: g.home?.name, away: g.away?.name, opponent, gameId: g.gameId, score: scoreStr, result }
           })

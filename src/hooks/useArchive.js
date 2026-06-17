@@ -48,9 +48,11 @@ function transformSeason(archiveSeason) {
 
 // ── useTeamHistory ─────────────────────────────────────────────────────────
 // Loads /data/teams/pharaohs.json — all seasons, rosters, records
+// Returns teamIds (all historical Pharaohs IDs) alongside seasons.
 
 export function useTeamHistory() {
   const [seasons, setSeasons] = useState(null)
+  const [teamIds, setTeamIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -63,6 +65,8 @@ export function useTeamHistory() {
       .then(data => {
         const transformed = (data.seasons || []).map(transformSeason)
         setSeasons(transformed)
+        // teamIds array from top-level of pharaohs.json (all historical IDs)
+        setTeamIds(new Set((data.teamIds || []).map(String)))
         setLoading(false)
       })
       .catch(err => {
@@ -71,13 +75,14 @@ export function useTeamHistory() {
       })
   }, [])
 
-  return { seasons, loading, error }
+  return { seasons, teamIds, loading, error }
 }
 
 // ── useCurrentSeason ───────────────────────────────────────────────────────
-// Loads standings, schedule+scores, and leaders for a given divId
+// Loads standings and schedule+scores for a given divId.
+// teamIds: Set of all Pharaohs historical team IDs (from useTeamHistory)
 
-export function useCurrentSeason(divId) {
+export function useCurrentSeason(divId, teamIds) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -93,20 +98,22 @@ export function useCurrentSeason(divId) {
       fetch(`${base}/scores.json`).then(r => r.ok ? r.json() : null),
     ])
       .then(([standings, schedule, scores]) => {
-        // Attach scores to schedule records
+        // scores.json has authoritative homeTeamId/awayTeamId (correct even for playoffs)
         const scoreMap = scores?.scores || {}
+
         const games = (schedule?.records || []).map(g => {
           const score = scoreMap[g.gameId]
-          const pharTeamId = g.home?.teamId === '1962' ||
-                             g.home?.teamId === '1911' ||
-                             g.home?.teamId === '1848' ||
-                             g.home?.teamId === '1829' ||
-                             g.home?.teamId === '1766' ||
-                             g.home?.teamId === '1708'
-            ? g.home?.teamId : g.away?.teamId
-          const weAreHome = score
-            ? score.homeTeamId === pharTeamId
+
+          // Prefer teamIds from scores.json — they're authoritative.
+          // Fall back to schedule teamIds for unplayed games.
+          const homeTeamId = String(score?.homeTeamId || g.home?.teamId || '')
+          const awayTeamId = String(score?.awayTeamId || g.away?.teamId || '')
+
+          const weAreHome = teamIds?.size
+            ? teamIds.has(homeTeamId)
             : g.home?.name?.toLowerCase().includes('phar')
+
+          const pharTeamId = weAreHome ? homeTeamId : awayTeamId
           const opponent = weAreHome ? g.away?.name : g.home?.name
 
           let result = null, scoreStr = null
@@ -114,17 +121,16 @@ export function useCurrentSeason(divId) {
             const ourScore = weAreHome ? score.homeScore : score.awayScore
             const theirScore = weAreHome ? score.awayScore : score.homeScore
             scoreStr = `${ourScore}-${theirScore}`
-            if (score.tie) result = 'T'
-            else result = score.winnerTeamId === pharTeamId ? 'W' : 'L'
+            result = score.tie ? 'T' : score.winnerTeamId === pharTeamId ? 'W' : 'L'
           }
 
           return {
             date: g.date,
             time: g.time || '',
             home: g.home?.name || '',
-            homeTeamId: g.home?.teamId || '',
+            homeTeamId,
             away: g.away?.name || '',
-            awayTeamId: g.away?.teamId || '',
+            awayTeamId,
             opponent,
             gameId: g.gameId,
             score: scoreStr,
@@ -142,7 +148,7 @@ export function useCurrentSeason(divId) {
         setError(err.message)
         setLoading(false)
       })
-  }, [divId])
+  }, [divId, teamIds])
 
   return { data, loading, error }
 }
