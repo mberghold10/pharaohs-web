@@ -103,6 +103,8 @@ The key is F2's positioning. Too far ahead and the defender can cover both. Too 
           type: 'tip',
           text: 'F1 makes the decision at the circle. F2\'s job is to be in position for both options simultaneously — that\'s what the stagger creates.',
         },
+        image: '/pharaohs-strategy-2-on-1.jpeg',
+        imageAlt: '2-on-1 offensive rush diagram',
       },
       {
         title: '2-on-1 (Defensive)',
@@ -135,6 +137,8 @@ Key rules:
 • Do not let the middle man get a clean shot — one D pressures the puck, the other takes away the slot pass
 • Communicate constantly: "I've got the puck," "I've got the middle," etc.`,
         callout: { type: 'tip', text: 'The worst outcome is both D going to the puck. Stay disciplined and communicate.' },
+        image: '/pharaohs-strategy-3-on-2.jpeg',
+        imageAlt: '3-on-2 scenario diagram',
       },
     ],
   },
@@ -265,6 +269,11 @@ export default function Strategy() {
                           {sub.callout.type === 'rule' ? '📋' : '💡'}
                         </span>
                         <p>{sub.callout.text}</p>
+                      </div>
+                    )}
+                    {sub.image && (
+                      <div className="strategy-image">
+                        <img src={sub.image} alt={sub.imageAlt || ''} />
                       </div>
                     )}
                   </div>

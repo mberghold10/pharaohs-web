@@ -46,7 +46,17 @@ export default function Home() {
           fetch(`${base}/standings.json`).then(r => r.ok ? r.json() : null),
         ]).then(([schedule, scores, standingsData]) => {
           const scoreMap = scores?.scores || {}
-          const parsedGames = (schedule?.records || []).map(g => {
+          const parsedGames = (schedule?.records || [])
+            .filter(g => {
+              // Only include games where Pharaohs are playing
+              const score = scoreMap[g.gameId]
+              const homeId = String(score?.homeTeamId || g.home?.teamId || '')
+              const awayId = String(score?.awayTeamId || g.away?.teamId || '')
+              return pharaohsIds.has(homeId) || pharaohsIds.has(awayId) ||
+                g.home?.name?.toLowerCase().includes('phar') ||
+                g.away?.name?.toLowerCase().includes('phar')
+            })
+            .map(g => {
             const score = scoreMap[g.gameId]
             // Use authoritative teamIds from scores.json
             const homeTeamId = String(score?.homeTeamId || g.home?.teamId || '')
