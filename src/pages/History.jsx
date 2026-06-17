@@ -76,7 +76,17 @@ function PlayerCard({ player, onClose }) {
                 }
               </thead>
               <tbody>
-                {[...player.seasons].sort((a, b) => b.season.localeCompare(a.season)).map((s, i) => (
+                {[...player.seasons].sort((a, b) => {
+                  const parseS = s => {
+                    const m = s.season.match(/^(\w+)\s+(\d{4})$/)
+                    if (!m) return [0, 0]
+                    const order = { Spring: 1, Summer: 2, Fall: 3, Winter: 4 }
+                    return [parseInt(m[2]), order[m[1]] ?? 0]
+                  }
+                  const [ay, at] = parseS(a)
+                  const [by, bt] = parseS(b)
+                  return by !== ay ? by - ay : bt - at
+                }).map((s, i) => (
                   isGoalie ? (
                     <tr key={i}>
                       <td>{s.season}</td>

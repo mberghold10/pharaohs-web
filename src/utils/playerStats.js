@@ -78,15 +78,11 @@ export function aggregatePlayers(seasons) {
   for (const season of seasons) {
     const seasonName = season.seasonName
 
-    // Only use regular season skaters — these come from team-specific pages
-    // and are definitively Pharaohs players. Playoff skaters come from division-
-    // level pages and may include non-Pharaohs players.
     for (const p of (season.skaters || [])) {
       if (!p.name || p.name.toLowerCase().includes('substitute')) continue
       addSkater(playerMap, p, seasonName, false)
     }
 
-    // Same for goalies
     for (const g of (season.goalies || [])) {
       if (!g.name || g.name.toLowerCase().includes('substitute')) continue
       addGoalie(playerMap, g, seasonName, false)
