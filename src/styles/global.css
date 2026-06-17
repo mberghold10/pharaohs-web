@@ -83,6 +83,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden; /* prevent wide content from expanding the viewport on mobile */
 }
 
 body {
