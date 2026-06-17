@@ -1,39 +1,82 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '../hooks/useTheme'
-import scheduleData from '../data/schedule.json'
-import standingsData from '../data/standings.json'
 import './Home.css'
+
+const ARCHIVE_BASE = 'https://archive.fairfax.beer'
+const CURRENT_SEASON_LABEL = 'Division C' // fallback label while loading
 
 function getNextGames(games, count = 5) {
   const now = new Date()
   return games
-    .filter(g => new Date(g.date) >= now)
+    .filter(g => !g.result && g.date && new Date(g.date) >= now)
     .slice(0, count)
 }
 
 function getRecentResults(games, count = 5) {
-  const now = new Date()
   return games
-    .filter(g => new Date(g.date) < now && g.result)
+    .filter(g => g.result)
     .slice(-count)
     .reverse()
 }
 
 export default function Home() {
   const { theme } = useTheme()
-  const upcoming = getNextGames(scheduleData.games || [])
-  const recent = getRecentResults(scheduleData.games || [])
-  const pharaohs = (standingsData.standings || []).find(
-    t => t.team?.toLowerCase().includes('pharaoh')
-  )
+  const [games, setGames] = useState([])
+  const [standings, setStandings] = useState([])
+  const [currentSeason, setCurrentSeason] = useState(null)
+  const [loadingData, setLoadingData] = useState(true)
+
+  useEffect(() => {
+    // Step 1: fetch pharaohs.json to get current season's divId and teamId
+    fetch(`${ARCHIVE_BASE}/data/teams/pharaohs.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(team => {
+        if (!team?.seasons?.length) { setLoadingData(false); return }
+        const current = team.seasons[0] // most recent first
+        const divId = current.divId
+        const teamId = team.teamIds?.[0] || ''
+        setCurrentSeason({ ...current, teamId })
+
+        // Step 2: fetch current division data
+        const base = `${ARCHIVE_BASE}/data/divisions/${divId}`
+        return Promise.all([
+          fetch(`${base}/schedule.regular.json`).then(r => r.ok ? r.json() : null),
+          fetch(`${base}/scores.json`).then(r => r.ok ? r.json() : null),
+          fetch(`${base}/standings.json`).then(r => r.ok ? r.json() : null),
+        ]).then(([schedule, scores, standingsData]) => {
+          const scoreMap = scores?.scores || {}
+          const parsedGames = (schedule?.records || []).map(g => {
+            const score = scoreMap[g.gameId]
+            const weAreHome = g.home?.teamId === teamId
+            const opponent = weAreHome ? g.away?.name : g.home?.name
+            let result = null, scoreStr = null
+            if (score) {
+              const ourScore = weAreHome ? score.homeScore : score.awayScore
+              const theirScore = weAreHome ? score.awayScore : score.homeScore
+              scoreStr = `${ourScore}-${theirScore}`
+              result = score.tie ? 'T' : score.winnerTeamId === teamId ? 'W' : 'L'
+            }
+            return { date: g.date, time: g.time || '', home: g.home?.name, away: g.away?.name, opponent, gameId: g.gameId, score: scoreStr, result }
+          })
+          setGames(parsedGames)
+          setStandings(standingsData?.standings || [])
+          setLoadingData(false)
+        })
+      })
+      .catch(() => setLoadingData(false))
+  }, [])
+
+  const upcoming = getNextGames(games)
+  const recent = getRecentResults(games)
+  const pharaohs = standings.find(t => t.team?.toLowerCase().includes('pharaoh'))
 
   return (
     <div className="home">
       {/* Hero */}
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-badge">Winter 2025 · Division C</div>
+          <div className="hero-badge">{currentSeason ? `${currentSeason.seasonName} · Division ${currentSeason.divisionLabel}` : CURRENT_SEASON_LABEL}</div>
           <img
             src={theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.png'}
             alt="Pharaohs Hockey"
@@ -78,7 +121,7 @@ export default function Home() {
               <h2>Upcoming Games</h2>
             </div>
             {upcoming.length === 0 ? (
-              <div className="card-body"><p className="loading">No upcoming games found.</p></div>
+              <div className="card-body"><p className="loading">{loadingData ? 'Loading...' : 'No upcoming games found.'}</p></div>
             ) : (
               <table>
                 <thead>
@@ -109,7 +152,7 @@ export default function Home() {
               <h2>Recent Results</h2>
             </div>
             {recent.length === 0 ? (
-              <div className="card-body"><p className="loading">No recent results found.</p></div>
+              <div className="card-body"><p className="loading">{loadingData ? 'Loading...' : 'No recent results found.'}</p></div>
             ) : (
               <table>
                 <thead>
@@ -140,10 +183,10 @@ export default function Home() {
         </div>
 
         {/* Standings preview */}
-        {(standingsData.standings || []).length > 0 && (
+        {standings.length > 0 && (
           <div className="card" style={{ marginTop: 20 }}>
             <div className="card-header">
-              <h2>Division C Standings</h2>
+              <h2>Division Standings</h2>
             </div>
             <table>
               <thead>
@@ -158,7 +201,7 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {standingsData.standings.map((t, i) => (
+                {standings.map((t, i) => (
                   <tr key={i} className={t.team?.toLowerCase().includes('pharaoh') ? 'row-highlight' : ''}>
                     <td>{i + 1}</td>
                     <td><strong>{t.team}</strong></td>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import historyData from '../data/history.json'
+import { useTeamHistory } from '../hooks/useArchive'
 import { aggregatePlayers, getAllTimeLeaders } from '../utils/playerStats'
 import './History.css'
 
@@ -273,9 +273,10 @@ export default function History() {
   const [activeTab, setActiveTab] = useState('seasons')
   const [activeSeason, setActiveSeason] = useState(0)
   const [activePlayer, setActivePlayer] = useState(null)
-  const seasons = historyData.seasons || []
+  const { seasons, loading, error } = useTeamHistory()
+  const allSeasons = seasons || []
 
-  const allPlayers = useMemo(() => aggregatePlayers(seasons), [seasons])
+  const allPlayers = useMemo(() => aggregatePlayers(allSeasons), [allSeasons])
   const leaders = useMemo(() => getAllTimeLeaders(allPlayers, 10), [allPlayers])
   const skaterPlayers = allPlayers.filter(p => !p.isGoalie)
   const goaliePlayers = allPlayers.filter(p => p.isGoalie)
@@ -284,8 +285,10 @@ export default function History() {
     <div className="page-container history-page">
       <h1 className="page-title">Team History</h1>
       <p className="page-subtitle">
-        {seasons.length > 0
-          ? `${seasons.length} season${seasons.length !== 1 ? 's' : ''} of Pharaohs hockey`
+        {loading ? 'Loading...' :
+         error ? 'Could not load history' :
+         allSeasons.length > 0
+          ? `${allSeasons.length} season${allSeasons.length !== 1 ? 's' : ''} of Pharaohs hockey`
           : 'Seasons, championships, and the people who made it happen'}
       </p>
 
@@ -300,12 +303,16 @@ export default function History() {
       {/* ── Seasons tab ── */}
       {activeTab === 'seasons' && (
         <div className="history-content">
-          {seasons.length === 0 ? (
-            <p className="loading">Season history loading — run <code>npm run scrape:history</code> to populate.</p>
+          {loading ? (
+            <p className="loading">Loading season history...</p>
+          ) : error ? (
+            <p className="loading">Failed to load history: {error}</p>
+          ) : allSeasons.length === 0 ? (
+            <p className="loading">No season data found.</p>
           ) : (
             <div className="seasons-layout">
               <nav className="seasons-sidebar">
-                {seasons.map((s, i) => {
+                {allSeasons.map((s, i) => {
                   const pr = s.playoffs?.playoffResult
                   const lastGame = s.playoffs?.games?.filter(g => g.result).slice(-1)[0]
                   const wonLast = lastGame?.result === 'W'
@@ -325,7 +332,7 @@ export default function History() {
                 })}
               </nav>
               <div className="season-detail">
-                {activeSeason !== null && seasons[activeSeason] && <SeasonCard season={seasons[activeSeason]} />}
+                {activeSeason !== null && allSeasons[activeSeason] && <SeasonCard season={allSeasons[activeSeason]} />}
               </div>
             </div>
           )}
