@@ -5,19 +5,52 @@ import './Home.css'
 
 const ARCHIVE_BASE = 'https://archive.fairfax.beer'
 const CURRENT_SEASON_LABEL = 'Division C' // fallback label while loading
+const REFRESH_INTERVAL_MS = 10 * 60 * 1000
+
+function parseGameDate(dateStr, timeStr = '', useEndOfDay = false) {
+  if (!dateStr) return null
+
+  const isoDate = String(dateStr).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  const date = isoDate
+    ? new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]))
+    : new Date(dateStr)
+
+  if (Number.isNaN(date.getTime())) return null
+
+  const time = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*([AP]M)$/i)
+  if (time) {
+    let hour = Number(time[1]) % 12
+    if (time[3].toUpperCase() === 'PM') hour += 12
+    date.setHours(hour, Number(time[2]), 0, 0)
+  } else if (useEndOfDay) {
+    date.setHours(23, 59, 59, 999)
+  }
+
+  return date
+}
 
 function getNextGames(games, count = 5) {
-  const now = new Date()
+  const now = Date.now()
   return games
-    .filter(g => !g.result && g.date && new Date(g.date) >= now)
+    .map(game => ({ game, startsAt: parseGameDate(game.date, game.time, true)?.getTime() }))
+    .filter(({ game, startsAt }) => !game.result && Number.isFinite(startsAt) && startsAt >= now)
+    .sort((a, b) => a.startsAt - b.startsAt)
     .slice(0, count)
+    .map(({ game }) => game)
 }
 
 function getRecentResults(games, count = 5) {
   return games
-    .filter(g => g.result)
-    .slice(-count)
-    .reverse()
+    .map(game => ({ game, startsAt: parseGameDate(game.date, game.time)?.getTime() }))
+    .filter(({ game, startsAt }) => game.result && Number.isFinite(startsAt))
+    .sort((a, b) => b.startsAt - a.startsAt)
+    .slice(0, count)
+    .map(({ game }) => game)
+}
+
+async function fetchJson(url, signal) {
+  const response = await fetch(url, { cache: 'no-cache', signal })
+  return response.ok ? response.json() : null
 }
 
 export default function Home() {
@@ -28,57 +61,118 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true)
 
   useEffect(() => {
-    // Step 1: fetch pharaohs.json to get current season's divId and teamIds
-    fetch(`${ARCHIVE_BASE}/data/teams/pharaohs.json`)
-      .then(r => r.ok ? r.json() : null)
-      .then(team => {
-        if (!team?.seasons?.length) { setLoadingData(false); return }
+    let disposed = false
+    let activeController = null
+
+    async function loadData() {
+      activeController?.abort()
+      activeController = new AbortController()
+      const { signal } = activeController
+
+      try {
+        // Discover the current division dynamically from the team archive.
+        const team = await fetchJson(`${ARCHIVE_BASE}/data/teams/pharaohs.json`, signal)
+        if (!team?.seasons?.length || disposed) return
+
         const current = team.seasons[0] // most recent first
-        const divId = current.divId
-        const pharaohsIds = new Set((team.teamIds || []).map(String))
+        const pharaohsIds = new Set(
+          [...(team.teamIds || []), current.teamId].filter(Boolean).map(String)
+        )
         setCurrentSeason({ ...current })
 
-        // Step 2: fetch current division data
-        const base = `${ARCHIVE_BASE}/data/divisions/${divId}`
-        return Promise.all([
-          fetch(`${base}/schedule.regular.json`).then(r => r.ok ? r.json() : null),
-          fetch(`${base}/scores.json`).then(r => r.ok ? r.json() : null),
-          fetch(`${base}/standings.json`).then(r => r.ok ? r.json() : null),
-        ]).then(([schedule, scores, standingsData]) => {
-          const scoreMap = scores?.scores || {}
-          const parsedGames = (schedule?.records || [])
-            .filter(g => {
-              // Only include games where Pharaohs are playing
-              const score = scoreMap[g.gameId]
-              const homeId = String(score?.homeTeamId || g.home?.teamId || '')
-              const awayId = String(score?.awayTeamId || g.away?.teamId || '')
-              return pharaohsIds.has(homeId) || pharaohsIds.has(awayId) ||
-                g.home?.name?.toLowerCase().includes('phar') ||
-                g.away?.name?.toLowerCase().includes('phar')
-            })
-            .map(g => {
-            const score = scoreMap[g.gameId]
-            // Use authoritative teamIds from scores.json
-            const homeTeamId = String(score?.homeTeamId || g.home?.teamId || '')
-            const awayTeamId = String(score?.awayTeamId || g.away?.teamId || '')
-            const weAreHome = pharaohsIds.has(homeTeamId)
-            const pharTeamId = weAreHome ? homeTeamId : awayTeamId
-            const opponent = weAreHome ? g.away?.name : g.home?.name
-            let result = null, scoreStr = null
-            if (score) {
-              const ourScore = weAreHome ? score.homeScore : score.awayScore
-              const theirScore = weAreHome ? score.awayScore : score.homeScore
-              scoreStr = `${ourScore}-${theirScore}`
-              result = score.tie ? 'T' : score.winnerTeamId === pharTeamId ? 'W' : 'L'
-            }
-            return { date: g.date, time: g.time || '', home: g.home?.name, away: g.away?.name, opponent, gameId: g.gameId, score: scoreStr, result }
+        const base = `${ARCHIVE_BASE}/data/divisions/${current.divId}`
+        const [regularSchedule, playoffSchedule, scores, standingsData] = await Promise.all([
+          fetchJson(`${base}/schedule.regular.json`, signal),
+          fetchJson(`${base}/schedule.playoff.json`, signal),
+          fetchJson(`${base}/scores.json`, signal),
+          fetchJson(`${base}/standings.json`, signal),
+        ])
+        if (disposed) return
+
+        const scoreMap = scores?.scores || {}
+        const allScheduleRecords = [
+          ...(regularSchedule?.records || []),
+          ...(playoffSchedule?.records || []),
+        ]
+        const uniqueScheduleRecords = Array.from(new Map(
+          allScheduleRecords.map(game => {
+            const key = game.gameId
+              ? `id:${game.gameId}`
+              : `${game.date}|${game.time}|${game.home?.name}|${game.away?.name}`
+            return [key, game]
           })
-          setGames(parsedGames)
-          setStandings(standingsData?.standings || [])
-          setLoadingData(false)
-        })
-      })
-      .catch(() => setLoadingData(false))
+        ).values())
+
+        const parsedGames = uniqueScheduleRecords
+          .filter(game => {
+            const score = scoreMap[game.gameId]
+            const homeId = String(score?.homeTeamId || game.home?.teamId || '')
+            const awayId = String(score?.awayTeamId || game.away?.teamId || '')
+            return pharaohsIds.has(homeId) || pharaohsIds.has(awayId) ||
+              game.home?.name?.toLowerCase().includes('phar') ||
+              game.away?.name?.toLowerCase().includes('phar')
+          })
+          .map(game => {
+            const score = scoreMap[game.gameId]
+            const homeTeamId = String(score?.homeTeamId || game.home?.teamId || '')
+            const weAreHome = pharaohsIds.has(homeTeamId) ||
+              (!score?.homeTeamId && game.home?.name?.toLowerCase().includes('phar'))
+            const opponent = weAreHome ? game.away?.name : game.home?.name
+            const hasScore = score && score.homeScore != null && score.awayScore != null &&
+              Number.isFinite(Number(score.homeScore)) && Number.isFinite(Number(score.awayScore))
+            let result = game.result || null
+            let scoreStr = game.score || null
+
+            if (hasScore) {
+              const homeScore = Number(score.homeScore)
+              const awayScore = Number(score.awayScore)
+              const ourScore = weAreHome ? homeScore : awayScore
+              const theirScore = weAreHome ? awayScore : homeScore
+              scoreStr = `${ourScore}-${theirScore}`
+              result = ourScore === theirScore ? 'T' : ourScore > theirScore ? 'W' : 'L'
+            }
+
+            return {
+              date: game.date,
+              time: game.time || '',
+              home: game.home?.name,
+              away: game.away?.name,
+              opponent,
+              gameId: game.gameId,
+              rink: game.rink || game.location || '',
+              score: scoreStr,
+              result,
+              playoffs: game.mode === 'playoff' || game.playoffs === true,
+            }
+          })
+
+        setGames(parsedGames)
+        setStandings(standingsData?.standings || [])
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to refresh home-page data:', error)
+        }
+      } finally {
+        if (!disposed && !signal.aborted) setLoadingData(false)
+      }
+    }
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') loadData()
+    }
+
+    loadData()
+    window.addEventListener('focus', refreshWhenVisible)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+    const refreshInterval = window.setInterval(refreshWhenVisible, REFRESH_INTERVAL_MS)
+
+    return () => {
+      disposed = true
+      activeController?.abort()
+      window.removeEventListener('focus', refreshWhenVisible)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+      window.clearInterval(refreshInterval)
+    }
   }, [])
 
   const upcoming = getNextGames(games)
@@ -148,7 +242,7 @@ export default function Home() {
                 </thead>
                 <tbody>
                   {upcoming.map((g, i) => (
-                    <tr key={i}>
+                    <tr key={g.gameId || `${g.date}-${i}`}>
                       <td>{formatDate(g.date)}</td>
                       <td>{g.time || '—'}</td>
                       <td>{g.opponent || g.home || g.away || '—'}</td>
@@ -179,7 +273,7 @@ export default function Home() {
                 </thead>
                 <tbody>
                   {recent.map((g, i) => (
-                    <tr key={i}>
+                    <tr key={g.gameId || `${g.date}-${i}`}>
                       <td>{formatDate(g.date)}</td>
                       <td>{g.opponent || g.home || g.away || '—'}</td>
                       <td>{g.score || '—'}</td>
@@ -236,9 +330,10 @@ export default function Home() {
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const date = parseGameDate(dateStr)
+  return date
+    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '—'
 }
 
 function resultBadge(result) {
